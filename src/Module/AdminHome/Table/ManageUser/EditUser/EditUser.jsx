@@ -1,7 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
-import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Grid,
   IconButton,
@@ -11,55 +9,62 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+
 import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { registerAPI } from "../../../../APIs/UserApi";
-import { LoadingButton } from "@mui/lab";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+
+import { registerAPI } from "../../../../../APIs/UserApi";
+
 import dayjs from "dayjs";
+import { UpdateUserData } from "../../../../../APIs/AdminTechnique";
+const EditUser = ({ user }) => {
+  console.log("user.birthday", user.birthday);
+  const formatBirthday = dayjs(user.birthday).format("DD/MM/YYYY");
+  console.log("formatBirthday", formatBirthday);
 
-const AdminRegister = () => {
-  const [gender, setGender] = useState(false);
+  const queryClient = useQueryClient();
 
-  const [showPassword, setShowPassword] = useState(false);
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleMouseDownPassword = () => setShowPassword(!showPassword);
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
     setValue,
+    reset,
   } = useForm({
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      phone: "",
-      birthday: "",
-      gender: gender,
-      role: "",
-      skill: [""],
-      certification: [""],
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      phone: user.phone,
+      birthday: user.birthday,
+      gender: user.gender,
+      role: user.role,
+      skill: user.skill,
+      certification: user.certification,
     },
   });
-  const { mutate: handleRegister, isPending } = useMutation({
-    mutationFn: (values) => registerAPI(values),
+
+  const { mutate: handleUpdate, isPending } = useMutation({
+    mutationFn: (values) => UpdateUserData(values),
     onSuccess: () => {
-      alert("Register Successfully");
+      queryClient.invalidateQueries(["LIST_USER_PAGINATION"]);
     },
     onError: () => {
       alert("loi~vai");
     },
   });
-
-  const handleGender = (event) => {
-    setGender(event.target.value);
-  };
-
   const onSubmit = (values) => {
-    const result = handleRegister(values);
+    const result = handleUpdate(values);
   };
+
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = () => setShowPassword(!showPassword);
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -67,7 +72,7 @@ const AdminRegister = () => {
         sx={{ fontSize: "36px", fontWeight: "600" }}
         textAlign={"center"}
       >
-        Register
+        Edit Data User
       </Typography>
       <Grid
         container
@@ -78,12 +83,24 @@ const AdminRegister = () => {
         <Grid item lg={6}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={3}>
-              <TextField label="Name" fullWidth {...register("name")} />
+              <TextField
+                label="Name"
+                fullWidth
+                name="name"
+                {...register("name")}
+              />
 
-              <TextField label="Email" fullWidth {...register("email")} />
+              <TextField
+                label="Email"
+                fullWidth
+                name="email"
+                {...register("email")}
+                disabled
+              />
 
               <TextField
                 label="Password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 fullWidth
                 {...register("password")}
@@ -102,26 +119,34 @@ const AdminRegister = () => {
                 }}
               />
 
-              <TextField label="Phone" fullWidth {...register("phone")} />
+              <TextField
+                label="Phone"
+                name="phone"
+                fullWidth
+                {...register("phone")}
+              />
 
               <TextField
-                label="Gender"
                 select
-                value={gender}
-                onChange={handleGender}
+                name="gender"
+                label="Gender"
+                {...register("gender")}
+                defaultValue={user.gender}
               >
-                <MenuItem value={true}>Nam</MenuItem>
-                <MenuItem value={false}>Nữ</MenuItem>
+                <MenuItem value={true}>Male</MenuItem>
+                <MenuItem value={false}>Female</MenuItem>
               </TextField>
               <Controller
                 name="birthday"
                 control={control}
                 render={(field) => {
                   return (
-                    <DateTimePicker
+                    <DatePicker
                       label="Birthday"
                       format="DD/MM/YYYY"
-                      views={["year", "month", "day"]}
+                      views={["day", "month", "year"]}
+                      defaultValue={dayjs(user.birthday)}
+                      name="birthday"
                       onChange={(date) => {
                         const formatday = dayjs(date).format("DD/MM/YYYY");
                         setValue("birthday", formatday);
@@ -140,7 +165,7 @@ const AdminRegister = () => {
                 type="submit"
                 loading={isPending}
               >
-                Register
+                Update
               </LoadingButton>
             </Stack>
           </form>
@@ -150,4 +175,4 @@ const AdminRegister = () => {
   );
 };
 
-export default AdminRegister;
+export default EditUser;

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import {
+  Box,
   Grid,
   IconButton,
   InputAdornment,
@@ -12,15 +13,13 @@ import {
   Typography,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { registerAPI } from "../../../../APIs/UserApi";
+
 import { LoadingButton } from "@mui/lab";
 import dayjs from "dayjs";
-
-const AdminRegister = () => {
-  const [gender, setGender] = useState(false);
-
+import { registerAPI } from "../../../../../APIs/UserApi";
+const AddUser = () => {
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const handleMouseDownPassword = () => setShowPassword(!showPassword);
@@ -37,25 +36,19 @@ const AdminRegister = () => {
       password: "",
       phone: "",
       birthday: "",
-      gender: gender,
-      role: "",
+      gender: "",
+      role: "ADMIN",
       skill: [""],
       certification: [""],
     },
   });
   const { mutate: handleRegister, isPending } = useMutation({
     mutationFn: (values) => registerAPI(values),
-    onSuccess: () => {
-      alert("Register Successfully");
-    },
+    onSuccess: () => {},
     onError: () => {
       alert("loi~vai");
     },
   });
-
-  const handleGender = (event) => {
-    setGender(event.target.value);
-  };
 
   const onSubmit = (values) => {
     const result = handleRegister(values);
@@ -78,12 +71,23 @@ const AdminRegister = () => {
         <Grid item lg={6}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Stack spacing={3}>
-              <TextField label="Name" fullWidth {...register("name")} />
+              <TextField
+                label="Name"
+                fullWidth
+                name="name"
+                {...register("name")}
+              />
 
-              <TextField label="Email" fullWidth {...register("email")} />
+              <TextField
+                label="Email"
+                fullWidth
+                name="email"
+                {...register("email")}
+              />
 
               <TextField
                 label="Password"
+                name="password"
                 type={showPassword ? "text" : "password"}
                 fullWidth
                 {...register("password")}
@@ -102,26 +106,32 @@ const AdminRegister = () => {
                 }}
               />
 
-              <TextField label="Phone" fullWidth {...register("phone")} />
+              <TextField
+                label="Phone"
+                name="phone"
+                fullWidth
+                {...register("phone")}
+              />
 
               <TextField
-                label="Gender"
                 select
-                value={gender}
-                onChange={handleGender}
+                name="gender"
+                label="Gender"
+                {...register("gender")}
+                defaultValue={""}
               >
-                <MenuItem value={true}>Nam</MenuItem>
-                <MenuItem value={false}>Nữ</MenuItem>
+                <MenuItem value={true}>Male</MenuItem>
+                <MenuItem value={false}>Female</MenuItem>
               </TextField>
               <Controller
                 name="birthday"
                 control={control}
                 render={(field) => {
                   return (
-                    <DateTimePicker
+                    <DatePicker
                       label="Birthday"
                       format="DD/MM/YYYY"
-                      views={["year", "month", "day"]}
+                      views={["day", "month", "year"]}
                       onChange={(date) => {
                         const formatday = dayjs(date).format("DD/MM/YYYY");
                         setValue("birthday", formatday);
@@ -150,4 +160,4 @@ const AdminRegister = () => {
   );
 };
 
-export default AdminRegister;
+export default AddUser;

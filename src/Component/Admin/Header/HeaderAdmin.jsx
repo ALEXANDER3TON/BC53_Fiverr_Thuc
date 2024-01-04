@@ -1,9 +1,14 @@
-import React from 'react'
-
+import { Box, IconButton, Typography } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import React from "react";
+import style from "./adminHeader.module.scss";
 const HeaderAdmin = () => {
   return (
-    <div>HeaderAdmin</div>
-  )
-}
+    <Box className={style.header}>
+      
 
-export default HeaderAdmin
+    </Box>
+  );
+};
+
+export default HeaderAdmin;

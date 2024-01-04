@@ -1,38 +1,37 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-// import Swal from "sweetalert2";
-import axios from "axios";
 
-import { CURRENT_ADMIN } from "../../Constant";
+import { CURRENT_USER } from "../../Constant";
 import fetcher from "../../APIs/fetcher";
 
 export const loginAdmin = createAsyncThunk(
-  "admin/loginAdmin",
+  "user/loginuser",
   async (payload) => {
-    console.log("payload", payload);
     try {
-      const Request = await fetcher.post("/auth/signin", payload);
-      const response = await Request.data.content;
-      console.log("response", response);
-      localStorage.setItem(CURRENT_ADMIN, JSON.stringify(response));
+      const request = await fetcher.post("/auth/signin", payload);
+      const response = request.data.content;
+
+      localStorage.setItem(CURRENT_USER, JSON.stringify(response));
       return response;
-    } catch (error) {}
+    } catch (error) {
+      throw alert("loi");
+    }
   }
 );
 
 const initialState = {
   loading: false,
-  user: localStorage.getItem(CURRENT_ADMIN)
-    ? JSON.parse(localStorage.getItem(CURRENT_ADMIN))
+  user: localStorage.getItem(CURRENT_USER)
+    ? JSON.parse(localStorage.getItem(CURRENT_USER))
     : null,
   error: null,
 };
 
-export const LoginAdminSlice = createSlice({
-  name: "admin",
+export const LoginUserSlice = createSlice({
+  name: "user",
   initialState,
   reducers: {
     setLogout: (state, { payload }) => {
-      localStorage.removeItem(CURRENT_ADMIN);
+      localStorage.removeItem(CURRENT_USER);
       state.user = undefined;
     },
   },
@@ -56,4 +55,4 @@ export const LoginAdminSlice = createSlice({
   },
 });
 
-export const { reducer: AdminReducer, actions: AdminAction } = LoginAdminSlice;
+export const { reducer: UserReducer, actions: UserAction } = LoginUserSlice;
